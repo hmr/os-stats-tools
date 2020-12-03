@@ -1,6 +1,6 @@
-# osx-stat-tools
+# osx-stats-tools
 Simple and small tools to show various system stats which are unique to macOS.
-Intended to be used in tmux's status line.
+These tools are intended to be used in tmux's status line.
 
 ## print_uptime
 To show uptime of macOS in human friendly style like.
