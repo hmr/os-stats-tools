@@ -1,0 +1,21 @@
+#!/bin/sh
+# vim: ft=sh
+
+_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
+
+case "${_SYSTEM}" in
+
+    "darwin" )
+        _NETIF=$(route -n get 0.0.0.0 2>/dev/null | awk '/interface: / {print $2}')
+        ipconfig getifaddr ${_NETIF}
+        # _DEFGW=$(netstat -nr -f inet | grep default | awk '{print $2}') # Get the default gw
+        # traceroute -nv ${_DEFGW} 2>&1 | tail -n 1 | awk '{print $6}'
+        ;;
+
+    "linux" )
+        ip route | grep "default" | cut -d" " -f9
+        # another way
+        # ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'
+        ;;
+esac
+
