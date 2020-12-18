@@ -1,0 +1,306 @@
+#!/bin/sh
+
+#	get_distro() is copied from:
+#    shutil: some shared utilities used by all status scripts
+#    Copyright (C) 2011-2014 Dustin Kirkland
+get_distro() {
+	local distro="${DISTRO}"
+	if [ -n "$DISTRO" ]; then
+		# user defined
+		true
+	elif [ -r "/etc/os-release" ]; then
+		distro=$(. /etc/os-release && echo "$NAME")
+		case "$distro" in
+			Debian*)
+				[ -r /etc/lsb-release ] && distro=$(. /etc/lsb-release && [ -n "$GOOGLE_ID" ] && echo "gLinux" || echo "Debian")
+			;;
+		esac
+	elif [ -r "/etc/issue" ]; then
+		# lsb_release is *really* slow;  try to use /etc/issue first
+		local issue
+		IFS="" read issue < /etc/issue
+		case "$issue" in
+			Ubuntu*)
+				distro="Ubuntu";
+			;;
+			Debian*)
+				distro="Debian"
+			;;
+			Red\ Hat\ Enterprise*)
+				distro="RHEL"
+			;;
+			*)
+				# assume first field is what we want
+				distro="${issue%% *}";
+			;;
+		esac
+	elif eval $BYOBU_TEST lsb_release >/dev/null 2>&1; then
+		# If lsb_release is available, use it
+		local r=$(lsb_release -s -d)
+		case "$r" in
+			Ubuntu*)
+				# Use the -d if an Ubuntu LTS
+				distro="Ubuntu"
+			;;
+			*)
+				# But for other distros the description
+				# is too long, so build from -i and -r
+				distro=$(lsb_release -s -i)
+			;;
+		esac
+	elif eval $BYOBU_TEST sw_vers >/dev/null 2>&1; then
+		distro="$(sw_vers -productName)"
+	elif eval $BYOBU_TEST uname >/dev/null 2>&1; then
+		distro="$(uname -s)"
+	else
+		distro="Byobu"
+	fi
+	_RET="$distro"
+}
+
+color_screen() {
+	ESC="\005"
+	case "$1" in
+		"") return 0 ;;
+		-)   printf "$ESC{-}" ;;
+		--)   printf "$ESC{-} " ;;
+		esc)    printf "$ESC" ;;
+		bold1)  printf "$ESC{=b }" || printf "$ESC{= }" ;;
+		bold2)  printf "$ESC{+b }" || printf "$ESC{= }" ;;
+		none)   printf "$ESC{= }" ;;
+		invert) printf "$ESC{=r }" ;;
+		*)
+			local attr fg bg
+			case $# in
+				2)
+					attr= ; fg=$1 ; bg=$2
+				;;
+				3)
+					attr=$1 ; fg=$2 ; bg=$3
+				;;
+			esac
+			if [ "$MONOCHROME" = "1" ]; then
+				fg=
+				bg=
+			fi
+			printf "$ESC{=$attr $fg$bg}"
+		;;
+	esac
+}
+
+color_map() {
+	case "$1" in
+		"k") _RET="black" ;;
+		"r") _RET="red" ;;
+		"g") _RET="green" ;;
+		"y") _RET="yellow" ;;
+		"b") _RET="blue" ;;
+		"m") _RET="magenta" ;;
+		"c") _RET="cyan" ;;
+		"w") _RET="white" ;;
+		"d") _RET="black" ;;
+		"K") _RET="brightblack" ;;
+		"R") _RET="brightred" ;;
+		"G") _RET="brightgreen" ;;
+		"Y") _RET="brightyellow" ;;
+		"B") _RET="brightblue" ;;
+		"M") _RET="brightmagenta" ;;
+		"C") _RET="brightcyan" ;;
+		"W") _RET="brightwhite" ;;
+		*) _RET="$1" ;;
+	esac
+}
+
+attr_map() {
+	case "$1" in
+		"d") _RET=,dim ;;
+		"u") _RET=,underscore ;;
+		"b") _RET=,bold ;;
+		"r") _RET=,reverse ;;
+		"s") _RET=,standout ;;
+		"B") _RET=,blinking ;;
+		"h") _RET=,hidden ;;
+		"i") _RET=,italics ;;
+		*) _RET= ;;
+	esac
+}
+
+color_tmux() {
+	local back fore attr
+	case "$1" in
+		"") return 0 ;;
+		-)      printf "#[default]#[fg=$BYOBU_LIGHT,bg=$BYOBU_DARK]" ;;
+		--)     printf "#[default]#[fg=$BYOBU_LIGHT]#[bg=$BYOBU_DARK] " ;;
+		esc)    printf "" ;;
+		bold*)  printf "#[default]#[fg=bold]" ;;
+		none)   printf "#[default]#[fg=$BYOBU_LIGHT,bg=$BYOBU_DARK]" ;;
+		invert) printf "#[default]#[reverse]" ;;
+		*)
+			if [ "$#" = "2" ]; then
+				color_map "$1"; back="$_RET"
+				color_map "$2"; fore="$_RET"
+			else
+				attr_map "$1";  attr="$_RET"
+				color_map "$2"; back="$_RET"
+				color_map "$3"; fore="$_RET"
+			fi
+			[ "$MONOCHROME" = "1" ] && printf "#[default]" || printf "#[default]#[fg=$fore$attr,bg=$back]"
+		;;
+	esac
+}
+
+color() {
+	case "$BYOBU_BACKEND" in
+		tmux)
+			color_tmux "$@"
+		;;
+		screen)
+			color_screen "$@"
+		;;
+	esac
+}
+
+
+__logo() {
+	local logo=
+	get_distro
+	local BYOBU_DISTRO=$_RET
+	local BYOBU_SED="sed"
+	local BYOBU_BACKEND="tmux"
+	local BYOBU_CHARMAP="UTF-8"
+	local VTE_CJK_WIDTH=""
+	local MARKUP="true"
+
+	if [ -n "$LOGO" ]; then
+		# Allow users to define their own logo in $BYOBU_CONFIG_DIR/status
+		printf "%s" "$LOGO"
+		return
+	fi
+	local distro="$(printf "%s" "$BYOBU_DISTRO" | $BYOBU_SED 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/')"
+	case "$distro" in
+		*ubuntu*)
+			if $MARKUP; then
+				if [ "$BYOBU_BACKEND" = "tmux" ] && [ "$BYOBU_CHARMAP" = "UTF-8" ]; then
+					if [ ! "$VTE_CJK_WIDTH" = "1" ] && [ !  "$VTE_CJK_WIDTH" = "wide" ] ; then
+						# color "colour202" "colour255" ; printf " u "; color -
+						# Ubuntu's logo doesn't display anywhere, except for on Ubuntu itself, which has the Ubuntu font with the logo
+						# which breaks when you ssh into Ubuntu from elsewhere (Windows, Debian, Mac)
+						color "colour202" "colour255" ; printf " u "; color -
+					else
+						color m W; printf " u "; color -
+					fi
+				else
+					color m W; printf " u "; color -
+				fi
+			else
+				printf " u "
+			fi
+		;;
+		*alpine*)
+			logo=" /\\\\\\\\ "
+			$MARKUP && printf "$(color b b W)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*altlinux*)
+			logo="alt"
+			$MARKUP && printf "$(color Y k)%s$(color -)" "$logo" || printf "$logo"
+		;;
+	 	*arch*)
+			logo=" A "
+			$MARKUP && printf "$(color b w b)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*centos*)
+			if [ "$BYOBU_BACKEND" = "tmux" ] && [ "$BYOBU_CHARMAP" = "UTF-8" ]; then
+				logo="※ "
+				$MARKUP && printf "$(color w m)※ $(color -)" || printf "$logo"
+			else
+				$MARKUP && printf "$(color g w)*$(color -)$(color m w)*$(color -)$(color y w)*$(color -)$(color b w)*$(color -)" || printf "$logo"
+			fi
+		;;
+		*debian*)
+			logo=" @ "
+			$MARKUP && printf "$(color w r)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*fedora*)
+			logo=" f "
+			$MARKUP && printf "$(color b w)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*foresight*)
+			logo="<@>"
+			$MARKUP && printf "$(color b W g)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*gentoo*)
+			logo=" > "
+			$MARKUP && printf "$(color b c w)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*glinux*)
+			logo=" G "
+			# Green: 3cba54=71, Yellow: f4c20d=214, Red: db3236=167, Blue: 4885ed=69
+			$MARKUP && printf "$(color colour0 colour69)██$(color colour0 colour167)■$(color colour0 colour214)■$(color colour0 colour69)▄$(color colour0 colour71)█$(color colour0 colour167)■$(color -)" || printf "$logo"
+		;;
+		*mac*|*darwin*)
+			if [ "$BYOBU_BACKEND" = "tmux" ] && [ "$BYOBU_CHARMAP" = "UTF-8" ]; then
+				# The Apple option character
+				#logo=" ⌘  "
+				# The Apple logo -- only visible from Mac terminals
+				# logo="  "
+				# logo=$(echo -ne "\uF8FF")
+				logo=$(echo -ne "\uF179")
+			else
+				logo=" X "
+			fi
+			$MARKUP && printf "$(color w k)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*mandriva*)
+			logo=" (* "
+			$MARKUP && printf "$(color b k c) ($(color -)$(color b k y)*$(color -) " || printf "$logo"
+		;;
+		*mint*)
+			logo=" lm "
+			$MARKUP && printf "$(color g w)$logo$(color -)$(color g w)$(color -) " || printf "$logo"
+		;;
+		*openwrt*)
+			logo="OWrt"
+			$MARKUP && printf "$(color b colour66 W)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*raspbian*)
+			logo=" @ "
+			$MARKUP && printf "$(color colour125 colour15)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*red*hat*|*rhel*)
+			logo=" RH "
+			$MARKUP && printf "$(color R k)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*rockhopper*)
+			logo="palm"
+			$MARKUP && printf "$(color k w)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*slackware*)
+			logo=".S "
+			$MARKUP && printf "$(color u B k)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*suse*)
+			logo="SUSE"
+			$MARKUP && printf "$(color W g)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*xandros*)
+			logo=" X "
+			$MARKUP && printf "$(color W r)%s$(color -)" "$logo" || printf "$logo"
+		;;
+		*)
+			if [ "$BYOBU_BACKEND" = "tmux" ] && [ "$BYOBU_CHARMAP" = "UTF-8" ]; then
+				logo="〣"
+			else
+				logo="[B]"
+			fi
+			$MARKUP && printf "$(color b k W)%s$(color -)" "$logo" || printf " $logo "
+		;;
+	esac
+	printf " "
+}
+
+if [ "$1" = "" ]; then
+	get_distro
+	echo $_RET
+elif [ "$1" = "logo" ]; then
+	__logo
+fi
