@@ -1,5 +1,5 @@
-# osx-stats-tools
-Simple and small tools to show various system stats which are unique to macOS.
+# os-stats-tools
+Simple and small tools to show various system stats.
 These tools are intended to be used in tmux's status line.
 
 ## print_uptime
