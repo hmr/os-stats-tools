@@ -1,5 +1,5 @@
 #!/bin/sh
-# vim: ft=sh
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
 _SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
 
