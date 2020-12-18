@@ -1,0 +1,17 @@
+#!/bin/sh
+# vim: ft=sh
+
+_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
+
+case "${_SYSTEM}" in
+
+    "darwin" )
+        sysctl vm.loadavg | cut -d " " -f 3-5
+        ;;
+
+    "linux" )
+        cat /proc/loadavg | cut -d" " -f1-3
+        ;;
+
+esac
+
