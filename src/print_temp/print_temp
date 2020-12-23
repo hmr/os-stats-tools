@@ -1,0 +1,30 @@
+#!/bin/sh
+# vim: ft=sh
+
+_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
+_ARCH=$(uname -m | tr "[A-Z]" "[a-z]")
+
+
+case "${_SYSTEM}" in
+
+    "darwin" )
+        # I don't know how to obtain temperature information from macOS...
+        ;;
+
+    "linux" )
+        case "${_ARCH}" in
+            "aarch64" )
+                grep -i "raspberry" /proc/cpuinfo > /dev/null
+                if [ $? -eq 0 ]; then
+                    vcgencmd measure_temp | cut -d= -f2
+                fi
+                ;;
+
+            "x86_64" )
+                ;;
+            "i386" )
+                ;;
+        esac
+        ;;
+esac
+
