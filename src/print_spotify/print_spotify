@@ -1,0 +1,49 @@
+#!/bin/bash
+# vim: ft=bash ts=2 sw=2 et ff=unix fenc=utf-8
+
+#Part of Spotify-cli
+
+# print_spotify
+# Small tool to print currently playing music and artist
+# ORIGIN: 2020-12-27 by hmr
+
+set -eu
+
+##### Load libraries
+source ${LIBSPDIR}/common/user_functions
+
+# Option handling
+getoptions "$@"
+dprintf "Entering $0"
+dprintf "Debug print enabled."
+
+try_refresh || exit 145
+RES="$(get_player)"
+dprintf "RES=${RES}"
+RES_BODY=$(head -n-1 <<< "${RES}")
+HTTP_CODE=$(tail -n1 <<< "${RES}")
+dprintf "HTTP_CODE=${HTTP_CODE}"
+dprintf "RES_BODY=${RES_BODY}"
+
+case "${HTTP_CODE}" in
+    "${HTTP_OK}" )
+        TITLE=$(echo "${RES_BODY}" \
+            | jq -c '.item | [.name, .artists[0].name]' \
+            | sed -e 's/\[//g' -e 's/\]//g' -e 's/\"//g' \
+            | cut -d, -f1)
+        ARTIST=$(echo "${RES_BODY}" \
+            | jq -c '.item | [.name, .artists[0].name]' \
+            | sed -e 's/\[//g' -e 's/\]//g' -e 's/\"//g' \
+            | cut -d, -f2)
+        echo "${TITLE}(${ARTIST})"
+        ;;
+
+    "${HTTP_NO_CONTENT}" )
+        echo "Player stopped"
+        ;;
+
+    * )
+        echo "error"
+        ;;
+esac
+
