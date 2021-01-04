@@ -1,0 +1,31 @@
+#!/bin/bash
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+
+# Print 'Year Date Consumption Rate'
+#
+# ORIGIN: 2021-01-04 by hmr
+
+
+DATEBIN=${DATEBIN:="date"}
+BCBIN=${BCBIN:="bc"}
+SEDBIN=${SEDBIN:="sed"}
+
+_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
+TYPE_OF_DATE_BIN="BSD"
+${DATEBIN} --version >& /dev/null && TYPE_OF_DATE_BIN="GNU"
+
+case "$TYPE_OF_DATE_BIN" in
+
+  BSD )
+    lastday=$(LANG=C ${DATEBIN} -j -f "%d-%b" "31-Dec" +"%j")
+    ;;
+
+  GNU )
+    lastday=$(${DATEBIN} -d 31-Dec +"%j")
+    ;;
+esac
+
+today=$(date +"%j")
+postfix="%"
+echo "scale=3; ${today} / ${lastday} * 100" | ${BCBIN} | sed -e "s/00$/${postfix}/"
+
