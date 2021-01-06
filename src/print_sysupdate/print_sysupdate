@@ -6,13 +6,7 @@
 # ORIGIN: 2021-01-07 by hmr
 
 
-DATEBIN=${DATEBIN:="date"}
-BCBIN=${BCBIN:="bc"}
-SEDBIN=${SEDBIN:="sed"}
-
 _SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
-TYPE_OF_DATE_BIN="BSD"
-${DATEBIN} --version >& /dev/null && TYPE_OF_DATE_BIN="GNU"
 
 case "${_SYSTEM}" in
 
