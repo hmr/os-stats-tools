@@ -1,0 +1,28 @@
+#!/bin/bash
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+
+# Print existence of system update or number of upgrade packages not installed
+#
+# ORIGIN: 2021-01-07 by hmr
+
+
+DATEBIN=${DATEBIN:="date"}
+BCBIN=${BCBIN:="bc"}
+SEDBIN=${SEDBIN:="sed"}
+
+_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
+TYPE_OF_DATE_BIN="BSD"
+${DATEBIN} --version >& /dev/null && TYPE_OF_DATE_BIN="GNU"
+
+case "${_SYSTEM}" in
+
+  darwin )
+    ;;
+
+  linux )
+    pkgs=$(LANG=C apt list --upgradable 2>/dev/null | grep upgradable | wc -l)
+    ;;
+esac
+
+echo "#[bg=red,fg=white] ${pkgs}! "
+
