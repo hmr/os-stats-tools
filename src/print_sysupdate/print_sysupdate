@@ -18,5 +18,7 @@ case "${_SYSTEM}" in
     ;;
 esac
 
-echo "#[bg=red,fg=white] ${pkgs}! "
+if [ ${pkgs} -ne 0 ]; then
+  echo "#[bg=red,fg=white] ${pkgs}! "
+fi
 
