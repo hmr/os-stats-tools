@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
+_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 
 case "${_SYSTEM}" in
 
