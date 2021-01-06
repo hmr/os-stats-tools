@@ -11,6 +11,7 @@ _SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 case "${_SYSTEM}" in
 
   darwin )
+    pkgs=0
     ;;
 
   linux )
