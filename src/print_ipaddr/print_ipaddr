@@ -7,13 +7,13 @@ case "${_SYSTEM}" in
 
     "darwin" )
         _NETIF=$(route -n get 0.0.0.0 2>/dev/null | awk '/interface: / {print $2}')
-        ipconfig getifaddr ${_NETIF}
+        /usr/sbin/ipconfig getifaddr "${_NETIF}"
         # _DEFGW=$(netstat -nr -f inet | grep default | awk '{print $2}') # Get the default gw
         # traceroute -nv ${_DEFGW} 2>&1 | tail -n 1 | awk '{print $6}'
         ;;
 
     "linux" )
-        ip route | grep -E -v "default|docker" | head -n 1 | cut -d" " -f 9
+        /bin/ip route | grep -E -v "default|docker" | head -n 1 | cut -d" " -f 9
         # ip route | grep "default" | cut -d" " -f9
         # another way
         # ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'
