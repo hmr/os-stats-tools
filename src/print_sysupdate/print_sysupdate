@@ -15,7 +15,28 @@ case "${_SYSTEM}" in
     ;;
 
   linux )
-    pkgs=$(LANG=C apt list --upgradable 2>/dev/null | grep upgradable | wc -l)
+    # Raspberrypi OS
+    if [[ -e /etc/rpi-issue ]]; then
+      pkgmgr="apt"
+    # Ubuntu
+    elif [[ -e /etc/ubuntu-advantage ]]; then
+      pkgmgr="apt"
+    # CentOS
+    # Fedora
+    # RedHat
+    # Debian
+    # elif
+    fi
+
+    case "${pkgmgr}" in
+      apt )
+        pkgs=$(LANG=C apt list --upgradable 2>/dev/null | grep upgradable | wc -l)
+        ;;
+
+      yum )
+        ;;
+
+    esac
     ;;
 esac
 
