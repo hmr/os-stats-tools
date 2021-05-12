@@ -1,7 +1,7 @@
 #!/bin/sh
 # vim: ft=sh
 
-_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
+_SYSTEM=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 case "${_SYSTEM}" in
 
@@ -13,7 +13,8 @@ case "${_SYSTEM}" in
         ;;
 
     "linux" )
-        ip route | grep "default" | cut -d" " -f9
+        ip route | grep -E -v "default|docker" | head -n 1 | cut -d" " -f 9
+        # ip route | grep "default" | cut -d" " -f9
         # another way
         # ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'
         ;;
