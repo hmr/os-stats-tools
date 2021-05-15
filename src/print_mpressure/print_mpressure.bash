@@ -1,5 +1,18 @@
 #!/bin/bash
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
+# part of os-stats-tools
+# print_mpressure
+#   Print memory pressure.
+#
+# ORIGIN: 2020-12-04 by hmr
+
+
+set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
 
 _SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 
@@ -31,4 +44,3 @@ case "${_SYSTEM}" in
 
   esac
 
-# vim: ft=bash ts=2 sw=2 et fenc=utf-8

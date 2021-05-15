@@ -1,4 +1,18 @@
 #!/bin/sh
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+
+# part of os-stats-tools
+# print_syaname
+#   Print os type or system's logo.
+#
+# ORIGIN: 2020-12-19 by hmr
+
+
+set -e
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
 
 #	get_distro() is copied from:
 #    shutil: some shared utilities used by all status scripts

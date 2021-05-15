@@ -1,13 +1,18 @@
 #!/bin/bash
-# vim: ft=bash ts=2 sw=2 et ff=unix fenc=utf-8
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
-#Part of Spotify-cli
-
+# part of os-stats-tools
 # print_spotify
-# Small tool to print currently playing music and artist
-# ORIGIN: 2020-12-27 by hmr
+#   Small tool to print currently playing music and artist
+#
+# ORIGIN: 2021-01-01 by hmr
+
 
 set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
 
 ##### Load libraries
 source ${LIBSPDIR}/common/user_functions

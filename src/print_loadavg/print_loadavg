@@ -1,6 +1,19 @@
 #!/bin/sh
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
+# part of os-stats-tools
+# print_loadavg
+#   Print load avarage of this device.
+#
+# ORIGIN: 2020-12-18 by hmr
+
+
+set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
+
 _SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
 
 case "${_SYSTEM}" in

@@ -1,10 +1,18 @@
 #!/bin/bash
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
-# Print existence of system update or number of upgrade packages not installed
+# part of os-stats-tools
+# print_sysupdate
+#   Print existence of system update or number of upgrade packages not installed
 #
 # ORIGIN: 2021-01-07 by hmr
 
+
+set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
 
 _SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 

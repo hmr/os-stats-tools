@@ -1,10 +1,18 @@
 #!/bin/bash
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
-# Print 'Year Date Consumption Rate'
+# part of os-stats-tools
+# print_ydrate
+#   Print 'Year Date Consumption Rate'
 #
 # ORIGIN: 2021-01-04 by hmr
 
+
+set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
 
 DATEBIN=${DATEBIN:="date"}
 BCBIN=${BCBIN:="bc"}
