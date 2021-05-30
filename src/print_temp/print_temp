@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env -S nice -n 17 /bin/sh
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
 # part of os-stats-tools
@@ -14,8 +14,8 @@ trap 'exit 255' HUP QUIT TERM
 trap 'echo SIGINT caught; exit 254' 2
 trap 'echo SIGUSR1 caught; exit 253' USR1
 
-_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
-_ARCH=$(uname -m | tr "[A-Z]" "[a-z]")
+_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
+_ARCH=$(uname -m | tr "[:upper:]" "[:lower:]")
 
 
 case "${_SYSTEM}" in
@@ -27,9 +27,9 @@ case "${_SYSTEM}" in
     "linux" )
         case "${_ARCH}" in
             "aarch64" )
-                grep -i "raspberry" /proc/cpuinfo > /dev/null
-                if [ $? -eq 0 ]; then
-                    vcgencmd measure_temp | cut -c 6,7
+                # Raspberry Pi
+                if grep -i "raspberry" /proc/cpuinfo > /dev/null; then
+                    echo "$(cat /sys/devices/virtual/thermal/thermal_zone0/hwmon0/temp1_input) / 1000" | bc
                 fi
                 ;;
 

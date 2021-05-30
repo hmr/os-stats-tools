@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env -S nice -n 17 /bin/bash
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
 # part of os-stats-tools
