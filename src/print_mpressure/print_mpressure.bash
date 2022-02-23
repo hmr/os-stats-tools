@@ -1,4 +1,4 @@
-#!/usr/bin/env -S nice -n 17 /bin/bash
+#!/usr/bin/env -S nice -n 19 /bin/bash
 # vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
 
 # part of os-stats-tools
@@ -8,7 +8,7 @@
 # ORIGIN: 2020-12-04 by hmr
 
 
-set -eu
+set -eu -o debug
 
 trap 'exit 255' HUP QUIT TERM
 trap 'echo SIGINT caught; exit 254' 2
