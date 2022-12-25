@@ -16,6 +16,7 @@ trap 'echo SIGUSR1 caught; exit 253' USR1
 APT_AVAILABLE="/var/lib/update-notifier/updates-available"
 if [[ -e ${APT_AVAILABLE} ]]; then
   PKGS=($(grep -Eo "[[:digit:]]+" "${APT_AVAILABLE}"))
-  echo "Upd:${PKGS[0]:-0}/Sec:${PKGS[1]:-0}"
+  [[ -z ${PKGS[0]} ]] && echo "U:0/S:0"
+  echo "#[fg=white,bg=red]U:${PKGS[0]:-0}/S:${PKGS[1]:-0}"
 fi
 
