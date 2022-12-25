@@ -17,6 +17,6 @@ APT_AVAILABLE="/var/lib/update-notifier/updates-available"
 if [[ -e ${APT_AVAILABLE} ]]; then
   PKGS=($(grep -Eo "[[:digit:]]+" "${APT_AVAILABLE}"))
   [[ -z ${PKGS[0]} ]] && exit
-  echo "#[fg=#FFFFFF,bg=red] U:${PKGS[0]:-0}/S:${PKGS[1]:-0}"
+  echo "#[fg=\#FFFFFF,bg=red] U:${PKGS[0]:-0}/S:${PKGS[1]:-0}"
 fi
 
