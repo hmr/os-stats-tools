@@ -8,7 +8,7 @@
 # ORIGIN: 2020-12-23 by hmr
 
 
-set -eu -o debug
+set -eu
 
 trap 'exit 255' HUP QUIT TERM
 trap 'echo SIGINT caught; exit 254' 2
