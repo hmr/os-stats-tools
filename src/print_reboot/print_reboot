@@ -1,0 +1,20 @@
+#!/bin/bash
+# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+
+# part of os-stats-tools
+# print_reboot
+#   Indicate if reboot is required by system updates.
+#
+# ORIGIN: 2023-01-09 by hmr
+
+set -eu
+
+trap 'exit 255' HUP QUIT TERM
+trap 'echo SIGINT caught; exit 254' 2
+trap 'echo SIGUSR1 caught; exit 253' USR1
+
+REBOOT_REQUIRED="/var/run/reboot-required"
+if [[ -e ${REBOOT_REQUIRED} ]]; then
+  echo "#[bg=color51] #[fg=red,bold,underscore]>>>REBOOT<<<#[nobold,nounderscore] "
+fi
+
