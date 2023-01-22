@@ -17,6 +17,12 @@ APT_AVAILABLE="/var/lib/update-notifier/updates-available"
 if [[ -e ${APT_AVAILABLE} ]]; then
   PKGS=($(grep -Eo "[[:digit:]]+" "${APT_AVAILABLE}"))
   [[ ${PKGS[0]:-0} = 0 ]] && exit
-  echo "#[fg=colour255,bg=red] U:${PKGS[0]:-0}/S:${PKGS[1]:-0} "
+  if [[ ${PKGS[1]:-0} = 0 ]]; then
+    TMP_COLOR="#[fg=black,bg=yellow]"
+  else
+    TMP_COLOR="#[fg=colour255,bg=red]"
+  fi
+  echo "$TMP_COLOR U:${PKGS[0]:-0}/S:${PKGS[1]:-0} "
 fi
+unset APT_AVAILABLE TMP_COLOR PKGS
 
