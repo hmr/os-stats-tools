@@ -18,7 +18,7 @@ if [[ -e ${APT_AVAILABLE} ]]; then
   PKGS=($(grep -Eo "[[:digit:]]+" "${APT_AVAILABLE}"))
   [[ ${PKGS[0]:-0} = 0 ]] && exit
   if [[ ${PKGS[1]:-0} = 0 ]]; then
-    TMP_COLOR="#[fg=black,bg=yellow]"
+    TMP_COLOR="#[fg=black,bg=color226]"
   else
     TMP_COLOR="#[fg=colour255,bg=red]"
   fi
