@@ -1,5 +1,6 @@
-#!/usr/bin/env -S nice -n 19 /bin/sh
-# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+#!/usr/bin/env -S nice -n 19 sh
+# vim: syn=bash ft=sh ts=2 sw=2 et fenc=utf-8 ff=unix
+# shellcheck shell=bash disable=SC1091,SC3006,SC3010,SC3021,SC3043,SC3037 source=${GPP_HOME}
 
 # part of os-stats-tools
 # print_loadavg
@@ -14,17 +15,15 @@ trap 'exit 255' HUP QUIT TERM
 trap 'echo SIGINT caught; exit 254' 2
 trap 'echo SIGUSR1 caught; exit 253' USR1
 
-_SYSTEM=$(uname -s | tr "[A-Z]" "[a-z]")
-
+_SYSTEM=$(uname -s | tr "[:upper:]" "[:lower:]")
 case "${_SYSTEM}" in
 
     "darwin" )
-        sysctl vm.loadavg | cut -d " " -f 3-5
+        /usr/sbin/sysctl vm.loadavg | cut -d " " -f 3-5
         ;;
 
     "linux" )
-        cat /proc/loadavg | cut -d" " -f1-3
+        cut -d" " -f 1-3 < /proc/loadavg
         ;;
-
 esac
 
