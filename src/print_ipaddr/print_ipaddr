@@ -14,11 +14,12 @@ trap 'exit 255' HUP QUIT TERM
 trap 'echo SIGINT caught; exit 254' 2
 trap 'echo SIGUSR1 caught; exit 253' USR1
 
-_SYSTEM=$(uname -s | tr '[:upper:]' '[:lower:]')
+_SYSTEM=$(uname -s | /usr/bin/tr '[:upper:]' '[:lower:]')
 
 case "${_SYSTEM}" in
 
     "darwin" )
+        PATH="${PATH}:/sbin"
         _NETIF=$(route -n get 0.0.0.0 2>/dev/null | awk '/interface: / {print $2}')
         /usr/sbin/ipconfig getifaddr "${_NETIF}"
         # _DEFGW=$(netstat -nr -f inet | grep default | awk '{print $2}') # Get the default gw
