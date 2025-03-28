@@ -1,5 +1,5 @@
-#!/usr/bin/env -S nice -n 19 /bin/sh
-# vim: ft=sh ts=2 sw=2 et ff=unix fenc=utf-8
+#!/usr/bin/env -S nice -n 19 bash
+# vim: ft=sh syn=bash ts=2 sw=2 et ff=unix fenc=utf-8
 
 # part of os-stats-tools
 # print_temp
@@ -20,40 +20,56 @@ _ARCH=$(uname -m | tr "[:upper:]" "[:lower:]")
 
 case "${_SYSTEM}" in
 
-    "darwin" )
-        # I don't know how to obtain temperature information from macOS...
-        ;;
+  "darwin" )
+    # I don't know how to obtain temperature information from macOS...
+    ;;
 
-    "linux" )
-        case "${_ARCH}" in
-            "aarch64" )
-                # Raspberry Pi
-                if grep -i "raspberry" /proc/cpuinfo > /dev/null; then
+  "linux" )
+    case "${_ARCH}" in
+      aarch* | riscv* )
+        case "$(cat /proc/device-tree/model)" in
+          "Raspberry Pi 5"* )
+            _TGT=/sys/devices/virtual/thermal/thermal_zone0/temp
+            if [[ -r ${_TGT} ]]; then
+              printf "%s'C" "$(echo "$(cat ${_TGT}) / 1000" | bc)"
+            fi
 
-                  if [ -e "/sys/class/hwmon/hwmon0/temp1_input" ]; then
-                    printf "%s'C" "$(echo "$(cat /sys/class/hwmon/hwmon0/temp1_input) / 1000" | bc)"
-                  elif [ -e "/sys/class/hwmon/hwmon1/temp1_input" ]; then
-                    printf "%s'C" "$(echo "$(cat /sys/class/hwmon/hwmon1/temp1_input) / 1000" | bc)"
-                  elif [ -e "/sys/class/hwmon/hwmon2/temp1_input" ]; then
-                    printf "%s'C" "$(echo "$(cat /sys/class/hwmon/hwmon2/temp1_input) / 1000" | bc)"
-                  fi
+            # It's possible to get the cooling fan speed on Raspberry Pi 5
+            _TGT=""
+            for _TGT in /sys/class/hwmon/hwmon*/fan1_input; do
+              if [[ -r ${_TGT} ]]; then
+                printf " %srpm" "$(cat ${_TGT})"
+              fi
+            done
+            ;;
 
-                  if [ -e "/sys/class/hwmon/hwmon0/fan1_input" ]; then
-                    printf " %srpm" "$(cat /sys/class/hwmon/hwmon0/fan1_input)"
-                  elif [ -e "/sys/class/hwmon/hwmon1/fan1_input" ]; then
-                    printf " %srpm" "$(cat /sys/class/hwmon/hwmon1/fan1_input)"
-                  elif [ -e "/sys/class/hwmon/hwmon2/fan1_input" ]; then
-                    printf " %srpm" "$(cat /sys/class/hwmon/hwmon2/fan1_input)"
-                  fi
+          "Raspberry Pi 4"* )
+            _TGT=/sys/devices/virtual/thermal/thermal_zone0/temp
+            if [[ -r ${_TGT} ]]; then
+              printf "%s'C" "$(echo "$(cat ${_TGT}) / 1000" | bc)"
+            fi
+            ;;
 
-                fi
-                ;;
-
-            "x86_64" )
-                ;;
-            "i386" )
-                ;;
+          "StarFive VisionFive 2"* )
+            _TGT=/sys/devices/virtual/thermal/thermal_zone0/temp
+            if [[ -r ${_TGT} ]]; then
+              printf "%s'C" "$(echo "$(cat ${_TGT}) / 1000" | bc)"
+            fi
+            ;;
         esac
         ;;
+
+      x86_64 )
+        _TGT=/sys/devices/virtual/thermal/thermal_zone0/temp
+        if [[ -r ${_TGT} ]]; then
+          printf "%s'C" "$(echo "$(cat ${_TGT}) / 1000" | bc)"
+        fi
+        ;;
+
+      i386 )
+        ;;
+
+    esac
+    ;;
 esac
 
