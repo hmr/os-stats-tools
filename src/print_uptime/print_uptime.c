@@ -3,7 +3,7 @@
  * print_uptime.c
  * This program shows uptime of macOS in human friendly style.
  *
- * ORIGIN: 20202-12-03 by hmr
+ * ORIGIN: 2022-12-03 by hmr
  */
 
 #ifdef _LINUX
@@ -58,28 +58,40 @@ int main(void)
 {
     double uptime_orig, uptime_month, uptime_week, uptime_day, uptime_hour, uptime_min, uptime_sec;
     const double min_sec = 60;
-    const double hour_sec = min_sec * 60;
-    const double day_sec = hour_sec * 24;
-    const double week_sec = day_sec * 7;
-    const double month_sec = day_sec * 30;
+    const double hour_sec = min_sec  * 60;	//    3600
+    const double day_sec = hour_sec  * 24;	//   86400
+    const double week_sec = day_sec  *  7;	//  604800
+    const double month_sec = day_sec * 28;	// 2419200
 
     uptime_orig = get_uptime();
     dbgprintf("uptime_orig=%f\n", uptime_orig);
+
+	// Month (uptime / 2419200 secs)
     errno=0;
     uptime_month  = uptime_orig / month_sec;
     dbgprintf("errno=%d, uptime_month=%f\n", errno, uptime_month);
+
+    // Week (uptime % 2419200 secs) / 604800 secs
     errno=0;
     uptime_week   = fmod(uptime_orig, month_sec) / week_sec;
     dbgprintf("errno=%d, uptime_week=%f\n", errno, uptime_week);
+
+    // Day (uptime % 604800 secs) / 86400 secs
     errno=0;
     uptime_day    = fmod(uptime_orig, week_sec) / day_sec;
     dbgprintf("errno=%d, uptime_day=%f\n", errno, uptime_day);
+
+    // Hour (uptime % 86400 secs) / 3600 secs
     errno=0;
     uptime_hour   = fmod(uptime_orig, day_sec) / hour_sec;
     dbgprintf("errno=%d, uptime_hour=%f\n", errno, uptime_hour);
+
+    // Min (uptime % 3600 secs) / 60 secs
     errno=0;
     uptime_min    = fmod(uptime_orig, hour_sec) / min_sec;
     dbgprintf("errno=%d, uptime_min=%f\n", errno, uptime_min);
+
+    // Sec (uptime % 60 secs)
     errno=0;
     uptime_sec    = fmod(uptime_orig, min_sec);
     dbgprintf("errno=%d, uptime_sec=%f\n", errno, uptime_sec);
